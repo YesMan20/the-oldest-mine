@@ -1,0 +1,24 @@
+modLoader="javafml" #mandatory
+loaderVersion="${loader_version_range}" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+license="${mod_license}"
+
+[[mods]] #mandatory
+modId="tom" #mandatory
+version="0.0.1-1.20.1" #mandatory
+displayName="The Oldest Mine" #mandatory
+authors="YesMan2, Sir.Pancakes" #optional
+description='''${mod_description}'''
+
+[[dependencies.tom]] #optional
+    modId="forge" #mandatory
+    mandatory=true #mandatory
+    versionRange="${forge_version_range}" #mandatory
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.tom]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
