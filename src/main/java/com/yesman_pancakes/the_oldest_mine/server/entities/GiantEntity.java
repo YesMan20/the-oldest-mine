@@ -78,6 +78,8 @@ public class GiantEntity extends Monster {
         }
     }
 
+    // Hiii
+
     static class ChasePlayerGoal extends MeleeAttackGoal {
         final GiantEntity giantEntity;
 
