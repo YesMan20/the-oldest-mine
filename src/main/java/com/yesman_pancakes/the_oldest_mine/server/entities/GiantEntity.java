@@ -1,12 +1,10 @@
 package com.yesman_pancakes.the_oldest_mine.server.entities;
 
 import com.yesman_pancakes.the_oldest_mine.client.sounds.TOMSoundsRegistry;
-import com.yesman_pancakes.the_oldest_mine.server.entities.goals.WatchPlayerGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -14,7 +12,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
@@ -57,8 +54,9 @@ public class GiantEntity extends Monster {
     @Override
     protected void registerGoals() {
         super.registerGoals();
+        this.goalSelector.addGoal(16, new RandomStrollGoal(this, 1.0D));
         this.targetSelector.addGoal(18, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        this.goalSelector.addGoal(16, new WatchPlayerGoal(this, 10.0F));
+        this.goalSelector.addGoal(16, new GiantEntity.ChasePlayerGoal(this, 1.0D, true));
     }
 
     public static class RunFromPlayerGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {

@@ -3,6 +3,7 @@ package com.yesman_pancakes.the_oldest_mine;
 import com.mojang.logging.LogUtils;
 import com.yesman_pancakes.the_oldest_mine.client.sounds.TOMSoundsRegistry;
 import com.yesman_pancakes.the_oldest_mine.server.entities.TOMEntitiesRegistry;
+import com.yesman_pancakes.the_oldest_mine.server.paintings.TOMPaintingsRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.food.FoodProperties;
@@ -42,6 +43,7 @@ public class TheOldestMine {
 
         TOMEntitiesRegistry.ENTITES.register(modEventBus);
         TOMSoundsRegistry.SOUND_EVENTS.register(modEventBus);
+        TOMPaintingsRegistry.PAINTING_VARIANTS.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(this);
     }
