@@ -5,6 +5,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,8 +33,8 @@ public class GiantEntity extends Monster {
     private GiantEntity.SlowlyChaseGoal slowlyChaseGoal;
     public int RollResult = 3;
 
-    protected GiantEntity(EntityType<? extends Monster> p_33002_, Level p_33003_) {
-        super(p_33002_, p_33003_);
+    protected GiantEntity(EntityType<? extends Monster> pEntity, Level pLevel) {
+        super(pEntity, pLevel);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -45,6 +48,11 @@ public class GiantEntity extends Monster {
     @Override
     protected void playStepSound(@NotNull BlockPos pPos, @NotNull BlockState pState) {
         this.playSound(TOMSoundsRegistry.ROLLING.get(), 1.0F, 1.0F);
+    }
+
+    @Override
+    protected float getJumpPower() {
+        return 0.0f;
     }
 
     /**
