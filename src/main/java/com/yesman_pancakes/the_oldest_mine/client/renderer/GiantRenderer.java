@@ -16,7 +16,7 @@ public class GiantRenderer extends MobRenderer<GiantEntity, GiantModel<GiantEnti
     }
 
     @Override
-    public ResourceLocation getTextureLocation(GiantEntity pEntity) {
+    public @NotNull ResourceLocation getTextureLocation(@NotNull GiantEntity pEntity) {
         return new ResourceLocation(TheOldestMine.MODID, "textures/entity/rolling_giant.png");
     }
 }

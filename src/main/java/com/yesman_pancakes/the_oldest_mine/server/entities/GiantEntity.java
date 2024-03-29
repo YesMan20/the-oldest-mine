@@ -5,12 +5,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
@@ -24,14 +23,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.Random;
+import java.util.Objects;
+import java.util.UUID;
 
 public class GiantEntity extends Monster {
+    private static final UUID SPEED_MODIFIER_UUID = UUID.fromString("B9766B59-9566-4402-BC1F-2EE2A276D836");
+    private static final AttributeModifier SPEED_MODIFIER = new AttributeModifier(SPEED_MODIFIER_UUID, "Speed boost", 0.9D, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final EntityDataAccessor<Boolean> DATA_HAS_TARGET = SynchedEntityData.defineId(GiantEntity.class, EntityDataSerializers.BOOLEAN);
     private GiantEntity.RunFromPlayerGoal<Player> runFromPlayerGoal;
     private GiantEntity.ChasePlayerGoal chasePlayerGoal;
     private GiantEntity.SlowlyChaseGoal slowlyChaseGoal;
-    public int RollResult = 3;
 
     protected GiantEntity(EntityType<? extends Monster> pEntity, Level pLevel) {
         super(pEntity, pLevel);
@@ -42,7 +43,13 @@ public class GiantEntity extends Monster {
                 .add(Attributes.MOVEMENT_SPEED, 0.2F)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 100.0D)
                 .add(Attributes.MAX_HEALTH, 100.0D)
+                .add(Attributes.FOLLOW_RANGE, 500.0D)
                 .add(Attributes.ATTACK_DAMAGE, 100.0F);
+    }
+
+    @Override
+    protected float getJumpPower() {
+        return 0.0F;
     }
 
     @Override
@@ -51,8 +58,8 @@ public class GiantEntity extends Monster {
     }
 
     @Override
-    protected float getJumpPower() {
-        return 0.0f;
+    public boolean isPersistenceRequired() {
+        return true;
     }
 
     /**
@@ -92,8 +99,8 @@ public class GiantEntity extends Monster {
         public ChasePlayerGoal(GiantEntity pGiant, double pSpeedModifier, boolean pFollowingTargetEvenIfNotSeen) {
             super(pGiant, pSpeedModifier, pFollowingTargetEvenIfNotSeen);
             this.giantEntity = pGiant;
+            this.giantEntity.level();
         }
-
 
         public boolean canUse() {
             return super.canUse();
@@ -141,13 +148,22 @@ public class GiantEntity extends Monster {
     }
 
     @Override
+    public void baseTick() {
+        if (!this.level().isClientSide && this.hasTarget()) {
+            AttributeInstance attributeinstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
+            assert attributeinstance != null;
+            attributeinstance.removeModifier(SPEED_MODIFIER);
+            if (Objects.requireNonNull(this.getTarget()).isSprinting()) {
+                attributeinstance.addTransientModifier(SPEED_MODIFIER);
+                ;
+            }
+        }
+        super.baseTick();
+    }
+
+    @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DATA_HAS_TARGET, false);
-    }
-
-    public void Roll() {
-        Random rand = new Random();
-        this.RollResult = rand.nextInt(3);
     }
 }
