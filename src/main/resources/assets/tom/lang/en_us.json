@@ -1,6 +1,12 @@
 {
   "entity.tom.rolling_giant": "The Rolling Giant",
+
   "painting.tom.werebackposter.author": "We're Back! Poster ",
   "painting.tom.werebackposter.title": "Dallas City Hall",
-  "sounds.tom.rolling": "Rolling"
+
+  "sounds.tom.rolling": "Rolling",
+  "sounds.tom.music_disc.unnamed_shopping_muzak": "Unnamed Shopping Muzak",
+
+  "item.tom.unnamed_shopping_muzak_music_disc": "Music Disc",
+  "item.tom.unnamed_shopping_muzak_music_disc.desc": "Josh Augustin - Unnamed Shopping Muzak"
 }

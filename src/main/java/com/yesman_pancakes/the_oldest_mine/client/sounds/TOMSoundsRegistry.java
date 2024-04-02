@@ -14,6 +14,8 @@ public class TOMSoundsRegistry {
 
     public static final RegistryObject<SoundEvent> ROLLING = registerSoundEvent("rolling");
 
+    public static final RegistryObject<SoundEvent> UNNAMED_SHOPPING_MUZAK = registerSoundEvent("music_disc.unnamed_shopping_muzak");
+
     public static RegistryObject<SoundEvent> registerSoundEvent(String name) {
         ResourceLocation id = new ResourceLocation(TheOldestMine.MODID, name);
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(id));

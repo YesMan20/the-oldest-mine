@@ -1,6 +1,7 @@
 package com.yesman_pancakes.the_oldest_mine.server.entities;
 
 import com.yesman_pancakes.the_oldest_mine.client.sounds.TOMSoundsRegistry;
+import com.yesman_pancakes.the_oldest_mine.server.entities.goals.ChaseEntityGoal;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -12,18 +13,23 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.Path;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 
 public class GiantEntity extends Monster {
@@ -33,6 +39,8 @@ public class GiantEntity extends Monster {
     private GiantEntity.RunFromPlayerGoal<Player> runFromPlayerGoal;
     private GiantEntity.ChasePlayerGoal chasePlayerGoal;
     private GiantEntity.SlowlyChaseGoal slowlyChaseGoal;
+    private boolean returnShort = false;
+    public int RollResult = 3;
 
     protected GiantEntity(EntityType<? extends Monster> pEntity, Level pLevel) {
         super(pEntity, pLevel);
@@ -48,11 +56,6 @@ public class GiantEntity extends Monster {
     }
 
     @Override
-    protected float getJumpPower() {
-        return 0.0F;
-    }
-
-    @Override
     protected void playStepSound(@NotNull BlockPos pPos, @NotNull BlockState pState) {
         this.playSound(TOMSoundsRegistry.ROLLING.get(), 1.0F, 1.0F);
     }
@@ -62,6 +65,11 @@ public class GiantEntity extends Monster {
         return true;
     }
 
+    @Override
+    protected float getJumpPower() {
+        return 0.0F;
+    }
+
     /**
      * Goals
      */
@@ -69,9 +77,6 @@ public class GiantEntity extends Monster {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.goalSelector.addGoal(16, new RandomStrollGoal(this, 1.0D));
-        this.targetSelector.addGoal(18, new NearestAttackableTargetGoal<>(this, Player.class, true));
-        this.goalSelector.addGoal(16, new GiantEntity.ChasePlayerGoal(this, 1.0D, true));
     }
 
     public static class RunFromPlayerGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {
@@ -91,9 +96,7 @@ public class GiantEntity extends Monster {
         }
     }
 
-    // Hiii
-
-    static class ChasePlayerGoal extends MeleeAttackGoal {
+    public static class ChasePlayerGoal extends ChaseEntityGoal {
         final GiantEntity giantEntity;
 
         public ChasePlayerGoal(GiantEntity pGiant, double pSpeedModifier, boolean pFollowingTargetEvenIfNotSeen) {
@@ -111,7 +114,7 @@ public class GiantEntity extends Monster {
         }
     }
 
-    static class SlowlyChaseGoal extends ChasePlayerGoal {
+    static class SlowlyChaseGoal extends ChaseEntityGoal {
         final GiantEntity giantEntity;
 
         public SlowlyChaseGoal(GiantEntity pGiant, double pSpeedModifier, boolean pFollowingTargetEvenIfNotSeen) {
@@ -147,18 +150,60 @@ public class GiantEntity extends Monster {
         this.entityData.set(DATA_HAS_TARGET, hasTarget);
     }
 
+    public Path createShortPath(LivingEntity pathTarget) {
+        this.returnShort = true;
+        this.hasTarget();
+        Path shortPath = this.getNavigation().createPath(pathTarget, 0);
+        this.returnShort = true;
+        this.position();
+        return shortPath;
+    }
+
     @Override
-    public void baseTick() {
+    public void tick() {
         if (!this.level().isClientSide && this.hasTarget()) {
             AttributeInstance attributeinstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
             assert attributeinstance != null;
             attributeinstance.removeModifier(SPEED_MODIFIER);
             if (Objects.requireNonNull(this.getTarget()).isSprinting()) {
                 attributeinstance.addTransientModifier(SPEED_MODIFIER);
-                ;
             }
         }
-        super.baseTick();
+
+        if (tickCount == 200) {
+            Random random = new Random();
+            switch (random.nextInt(4)) {
+                case 0:
+                    this.goalSelector.removeGoal(new GiantEntity.ChasePlayerGoal(this, 1.0D, false));
+                    this.goalSelector.removeGoal(new GiantEntity.SlowlyChaseGoal(this, 1.0D, false));
+                    this.goalSelector.addGoal(16, new GiantEntity.RunFromPlayerGoal<>(this, Player.class, 100.0F, 1.0D, 1.0D));
+                    this.goalSelector.addGoal(16, new RandomStrollGoal(this, 1.0D));
+                    this.targetSelector.removeGoal(new NearestAttackableTargetGoal<>(this, Player.class, true));
+                    setNoAi(false);
+                    break;
+                case 1:
+                    this.goalSelector.addGoal(16, new GiantEntity.ChasePlayerGoal(this, 1.0D, false));
+                    this.goalSelector.removeGoal(new GiantEntity.SlowlyChaseGoal(this, 1.0D, false));
+                    this.goalSelector.removeGoal(new GiantEntity.RunFromPlayerGoal<>(this, Player.class, 100.0F, 1.0D, 1.0D));
+                    this.goalSelector.addGoal(16, new RandomStrollGoal(this, 1.0D));
+                    this.targetSelector.addGoal(18, new NearestAttackableTargetGoal<>(this, Player.class, true));
+                    setNoAi(false);
+                    break;
+                case 2:
+                    this.goalSelector.addGoal(16, new GiantEntity.SlowlyChaseGoal(this, 0.0D, false));
+                    this.goalSelector.removeGoal(new GiantEntity.RunFromPlayerGoal<>(this, Player.class, 100.0F, 1.0D, 1.0D));
+                    this.goalSelector.removeGoal(new GiantEntity.ChasePlayerGoal(this, 1.0D, false));
+                    this.goalSelector.addGoal(16, new RandomStrollGoal(this, 1.0D));
+                    this.targetSelector.addGoal(16, new NearestAttackableTargetGoal<>(this, Player.class, true));
+                    setNoAi(false);
+                    break;
+                case 3:
+                    setNoAi(true);
+            }
+            tickCount = 0;
+        }
+
+        super.tick();
     }
 
     @Override

@@ -4,5 +4,13 @@
     "sounds": [
       "tom:rolling"
     ]
+  },
+  "music_disc.unnamed_shopping_muzak": {
+    "sounds": [
+      {
+        "name": "tom:records/unnamed_shopping_muzak",
+        "stream": true
+      }
+    ]
   }
 }

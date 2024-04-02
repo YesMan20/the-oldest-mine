@@ -3,6 +3,7 @@ package com.yesman_pancakes.the_oldest_mine;
 import com.mojang.logging.LogUtils;
 import com.yesman_pancakes.the_oldest_mine.client.sounds.TOMSoundsRegistry;
 import com.yesman_pancakes.the_oldest_mine.server.entities.TOMEntitiesRegistry;
+import com.yesman_pancakes.the_oldest_mine.server.items.TOMItemsRegistry;
 import com.yesman_pancakes.the_oldest_mine.server.paintings.TOMPaintingsRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
@@ -44,12 +45,20 @@ public class TheOldestMine {
         TOMEntitiesRegistry.ENTITES.register(modEventBus);
         TOMSoundsRegistry.SOUND_EVENTS.register(modEventBus);
         TOMPaintingsRegistry.PAINTING_VARIANTS.register(modEventBus);
+        TOMItemsRegistry.ITEMS.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(this);
+        modEventBus.addListener(this::addCreative);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
 
+    }
+
+    private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+            event.accept(TOMItemsRegistry.UNNAMED_SHOPPING_MUZAK_MUSIC_DISC);
+        }
     }
 
     @SubscribeEvent
