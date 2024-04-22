@@ -1,6 +1,19 @@
 {
-  "entity.tom.rolling_giant": "Rolung Big Kitten!!",
-  "painting.tom.werebackposter.author": "Kitteh es bacc!!!",
-  "painting.tom.werebackposter.title": "Dalass cidy hal :3",
-  "sounds.tom.rolling": "rolung"
+  "entity.tom.rolling_giant": "Rolung Big Kitteh",
+
+  "painting.tom.werebackposter.author": "Dalass cidy hal :3",
+  "painting.tom.werebackposter.title": "Big Kitteh es bacc!!!",
+
+  "painting.tom.reverchon_portrait.author": "Julen Rivershon",
+  "painting.tom.reverchon_portrait.title": "Smart kitteh reverjon!!",
+
+  "sounds.tom.rolling": "rolung",
+  "sounds.tom.music_disc.unnamed_shopping_muzak": "Unnamed Shopping Muzak",
+  "sounds.tom.music_disc.star_eyes": "Star Eyes",
+
+  "item.tom.unnamed_shopping_muzak_music_disc": "Music Disc",
+  "item.tom.unnamed_shopping_muzak_music_disc.desc": "Josh Augustin - Unnamed Shopping Muzak",
+
+  "item.tom.star_eyes_music_disc": "Music Disc",
+  "item.tom.star_eyes_music_disc.desc": "Muzak Orchestra - Star Eyes"
 }
