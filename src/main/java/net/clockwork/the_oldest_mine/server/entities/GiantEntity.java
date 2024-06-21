@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -33,6 +34,10 @@ public class GiantEntity extends Monster {
     private static final AttributeModifier SPEED_MODIFIER = new AttributeModifier(SPEED_MODIFIER_UUID, "Speed boost", 0.9D, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final EntityDataAccessor<Boolean> DATA_HAS_TARGET = SynchedEntityData.defineId(GiantEntity.class, EntityDataSerializers.BOOLEAN);
     public boolean canRun = false;
+    private final HashMap<Integer, Behaviour> behaviours = new HashMap<>();
+    private Behaviour currentBehaviour;
+    public final MeleeAttackGoal attackGoal = new MeleeAttackGoal(this, 1.0, true);
+    public final SlowlyChaseGoal slowlyChaseGoal = new SlowlyChaseGoal(this, 0.0D, false);
 
     protected GiantEntity(EntityType<? extends Monster> pEntity, Level pLevel) {
         super(pEntity, pLevel);
@@ -52,7 +57,7 @@ public class GiantEntity extends Monster {
             return false;
         } else {
             if (pEntity instanceof LivingEntity) {
-                ((LivingEntity)pEntity).addEffect(new MobEffectInstance(TOMEffects.BOTANY.get(), 700), this);
+                ((LivingEntity) pEntity).addEffect(new MobEffectInstance(TOMEffects.BOTANY.get(), 700), this);
             }
 
             return true;
@@ -78,6 +83,24 @@ public class GiantEntity extends Monster {
         this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.0D, true));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
         super.registerGoals();
+
+        this.behaviours.put(1, new AgressiveBehaviour(this));
+    }
+
+    /**
+     * Has Target
+     */
+
+    @Override
+    public void setTarget(@Nullable LivingEntity pTarget) {
+        super.setTarget(pTarget);
+        this.setHasTarget(pTarget != null);
+
+        this.behaviours.compute(this.hasTarget() ? this.random.nextInt(5) : this.random.nextInt(4) * -1, (k, v) -> {
+            if (this.currentBehaviour != null) this.currentBehaviour.onDetach();
+            if (v != null) v.onAttach();
+            return this.currentBehaviour = v != null ? v : this.currentBehaviour;
+        });
     }
 
     public static class RunFromPlayerGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {
@@ -131,16 +154,6 @@ public class GiantEntity extends Monster {
         public boolean canContinueToUse() {
             return super.canContinueToUse();
         }
-    }
-
-    /**
-     * Has Target
-     */
-
-    @Override
-    public void setTarget(@Nullable LivingEntity pTarget) {
-        super.setTarget(pTarget);
-        this.setHasTarget(pTarget != null);
     }
 
     public boolean hasTarget() {
